@@ -97,7 +97,8 @@ foreach ($link in $allLinks) {
     if ($link.FullName -eq $bazelExternal) {
         $cacheLinks++
         $cacheTarget = GetLinkText $link
-        if ($cacheTarget -notmatch '^/root/\.cache/bazel/[^/]+/[^/]+/external$') {
+        if ($cacheTarget -notmatch '^/(?:[A-Za-z0-9._-]+/)+external$' -or
+            $cacheTarget -match '(^|/)\.\.(/|$)') {
             throw "Unexpected Bazel cache link: $($link.FullName) -> $cacheTarget"
         }
         continue
