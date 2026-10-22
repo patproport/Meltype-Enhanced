@@ -36,6 +36,13 @@ try {
     $roots = @(Get-ChildItem -LiteralPath $scratch -Directory)
     if ($roots.Count -ne 1) { Fail 'Expected one source root.' }
     $root = $roots[0].FullName
+    $vendorRoot = Join-Path $root 'external/mozc-bazel-vendor'
+    if (@(Get-ChildItem -LiteralPath $vendorRoot -Recurse -Force -Attributes ReparsePoint).Count -gt 0) {
+        Fail 'Source archive contains vendor links or reparse points.'
+    }
+    if (Test-Path -LiteralPath (Join-Path $vendorRoot 'bazel-external')) {
+        Fail 'Source archive contains an ephemeral Bazel cache link.'
+    }
     $manifestPath = Join-Path $root 'RELEASE-MANIFEST.json'
     $hashesPath = Join-Path $root 'SOURCE-FILES.sha256'
     if (-not (Test-Path -LiteralPath $manifestPath) -or -not (Test-Path -LiteralPath $hashesPath)) { Fail 'Missing release manifest or file hash list.' }

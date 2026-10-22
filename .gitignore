@@ -22,3 +22,6 @@ local.properties
 *.apk
 *.aab
 release/
+
+# Local handoff for Codex sessions; never publish.
+HANDOFF.md

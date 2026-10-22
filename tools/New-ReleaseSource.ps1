@@ -79,9 +79,6 @@ if (-not (Test-Path -LiteralPath (Join-Path $vendor '_registries') -PathType Con
 if (-not @(Get-ChildItem -LiteralPath $vendor -Directory | Where-Object Name -ne '_registries').Count) {
     Fail 'Mozc Bazel vendor directory has no external source repositories.'
 }
-$links = @(Get-ChildItem -LiteralPath $vendor -Recurse -Force -Attributes ReparsePoint |
-    Where-Object { $_.FullName -ne (Join-Path $vendor 'bazel-external') })
-if ($links.Count -gt 0) { Fail 'Bazel vendor contains unreviewed symbolic links; inspect and materialize them first.' }
 
 # Check the native binaries used for this APK against the local build outputs.
 Add-Type -AssemblyName System.IO.Compression
@@ -131,11 +128,7 @@ try {
     ExportGitTree $dotnet $dotnetSha $dotnetDest
     ExportSubmodules $dotnet $dotnetDest
     $vendorDest = Join-Path $bundle 'external/mozc-bazel-vendor'
-    New-Item -ItemType Directory -Path $vendorDest -Force | Out-Null
-    foreach ($item in Get-ChildItem -LiteralPath $vendor -Force) {
-        if ($item.Name -eq 'bazel-external') { continue }
-        Copy-Item -LiteralPath $item.FullName -Destination $vendorDest -Recurse -Force
-    }
+    & (Join-Path $PSScriptRoot 'Copy-SafeMozcVendor.ps1') -Source $vendor -Destination $vendorDest
     $required = @('LICENSE', 'THIRD-PARTY-NOTICES.md', 'licenses/KOTLIN-NOTICES.md',
         'licenses/native/MOZC-LICENSE.txt', 'licenses/native/MOZC-CREDITS.html',
         'licenses/native/DOTNET-LICENSE.txt', 'licenses/native/DOTNET-THIRD-PARTY-NOTICES.txt',
