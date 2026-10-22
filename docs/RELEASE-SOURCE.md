@@ -6,6 +6,8 @@ Status: the signed Release APK with SHA-256 `ca03480e438593f27b48f0c2005fcb5d97d
 
 `tools/New-ReleaseSource.ps1` exports the clean, tagged public commit through `git archive`. It does not copy the private development history or working-tree build outputs. It adds:
 
+On Windows, both source scripts use GNU tar bundled with Git for Windows. Windows' built-in bsdtar failed to extract Unicode-named files from the fixed .NET Runtime checkout, so it must not be used for this archive.
+
 | Archive path | Source |
 | --- | --- |
 | `upstream/` | Meltype submodule gitlink from the public commit; currently `45e14f86558aa6ea34f2c2ecd038ba95ca8c3c46`. Includes `dictionaries/`, license, and original third-party notices. |

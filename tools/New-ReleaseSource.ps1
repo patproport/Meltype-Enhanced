@@ -13,6 +13,9 @@ Set-StrictMode -Version Latest
 $repo = (Resolve-Path -LiteralPath (Split-Path $PSScriptRoot -Parent)).Path
 
 function Fail([string]$Reason) { throw $Reason }
+$gitExe = (Get-Command git -ErrorAction Stop).Source
+$gnuTar = Join-Path (Split-Path (Split-Path $gitExe -Parent) -Parent) 'usr/bin/tar.exe'
+if (-not (Test-Path -LiteralPath $gnuTar -PathType Leaf)) { Fail 'Git for Windows GNU tar is required to preserve Unicode source paths.' }
 function RunGit([string]$Directory, [string[]]$Arguments) {
     $result = & git -C $Directory @Arguments 2>&1
     if ($LASTEXITCODE -ne 0) { Fail "git failed in $Directory ($($Arguments[0]))" }
@@ -23,7 +26,7 @@ function ExportGitTree([string]$Directory, [string]$Revision, [string]$Destinati
     $tarFile = Join-Path $scratch ([guid]::NewGuid().ToString() + '.tar')
     & git -C $Directory archive --format=tar --output=$tarFile $Revision
     if ($LASTEXITCODE -ne 0) { Fail "git archive failed in $Directory" }
-    & tar -xf $tarFile -C $Destination
+    & $gnuTar --force-local -xf $tarFile -C $Destination
     if ($LASTEXITCODE -ne 0) { Fail "tar extraction failed for $Directory" }
     Remove-Item -LiteralPath $tarFile
 }
@@ -51,7 +54,6 @@ function RelativeName([string]$Base, [string]$Path) {
 }
 
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Fail 'git is required.' }
-if (-not (Get-Command tar -ErrorAction SilentlyContinue)) { Fail 'tar is required.' }
 $apk = (Resolve-Path -LiteralPath $ApkPath).Path
 $mozc = (Resolve-Path -LiteralPath $MozcCheckout).Path
 $vendor = (Resolve-Path -LiteralPath $MozcVendorDirectory).Path
@@ -173,7 +175,7 @@ try {
     New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
     $archive = Join-Path (Resolve-Path -LiteralPath $OutputDirectory).Path "$bundleName.tar.gz"
     if (Test-Path -LiteralPath $archive) { Fail "Archive already exists: $archive" }
-    & tar -czf $archive -C $scratch $bundleName
+    & $gnuTar --force-local -czf $archive -C $scratch $bundleName
     if ($LASTEXITCODE -ne 0) { Fail 'tar compression failed.' }
     $archiveHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     $checksums = @("$archiveHash  $([IO.Path]::GetFileName($archive))", "$($manifest.apkSha256)  $($manifest.apkFile)")

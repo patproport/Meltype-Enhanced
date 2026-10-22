@@ -7,6 +7,9 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 function Fail([string]$Reason) { throw $Reason }
+$gitExe = (Get-Command git -ErrorAction Stop).Source
+$gnuTar = Join-Path (Split-Path (Split-Path $gitExe -Parent) -Parent) 'usr/bin/tar.exe'
+if (-not (Test-Path -LiteralPath $gnuTar -PathType Leaf)) { Fail 'Git for Windows GNU tar is required to preserve Unicode source paths.' }
 $archive = (Resolve-Path -LiteralPath $ArchivePath).Path
 $apk = (Resolve-Path -LiteralPath $ApkPath).Path
 $sidecar = "$archive.sha256"
@@ -26,12 +29,12 @@ foreach ($file in @($archive, $apk)) {
 $scratch = Join-Path ([IO.Path]::GetTempPath()) ('meltype-source-check-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $scratch | Out-Null
 try {
-    $entries = @(& tar -tzf $archive)
+    $entries = @(& $gnuTar --force-local -tzf $archive)
     if ($LASTEXITCODE -ne 0) { Fail 'Cannot list source archive.' }
     if ($entries.Count -eq 0 -or @($entries | Where-Object { $_ -match '^/|(^|/)\.\.(?:/|$)|^[A-Za-z]:|\\' }).Count -gt 0) {
         Fail 'Archive contains an unsafe path.'
     }
-    & tar -xzf $archive -C $scratch
+    & $gnuTar --force-local -xzf $archive -C $scratch
     if ($LASTEXITCODE -ne 0) { Fail 'Cannot extract source archive.' }
     $roots = @(Get-ChildItem -LiteralPath $scratch -Directory)
     if ($roots.Count -ne 1) { Fail 'Expected one source root.' }
