@@ -1,0 +1,8 @@
+# Keep Bash scripts parseable when checked out on Windows.
+*.sh text eol=lf
+
+# Keep source-attributed data and APK notice snapshots byte-for-byte.
+app/src/main/assets/pastiera/*.json -text
+LICENSE -text
+THIRD-PARTY-NOTICES.md -text
+licenses/** -text

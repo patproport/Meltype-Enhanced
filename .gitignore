@@ -1,0 +1,24 @@
+# Gradle / Android
+.gradle/
+build/
+app/build/
+tools/keylogger/build/
+local.properties
+*.iml
+.idea/
+.cxx/
+# 署名の鍵
+*.jks
+*.keystore
+# superpowers の作業用 (計画の実行の記録)
+.superpowers/
+# Local credentials and release signing material
+.env
+.env.*
+*.pem
+*.p12
+*.pfx
+*.asc
+*.apk
+*.aab
+release/
