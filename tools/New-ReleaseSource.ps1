@@ -145,8 +145,9 @@ try {
     $files = @(Get-ChildItem -LiteralPath $bundle -File -Recurse -Force)
     foreach ($file in $files) {
         $name = RelativeName $bundle $file.FullName
-        $localSource = $name -notmatch '^(?:upstream|external/mozc|external/dotnet-runtime)/'
+        $localSource = $name -notmatch '^(?:upstream|external/mozc|external/dotnet-runtime|external/mozc-bazel-vendor)/'
         if ($name -match '^(?:build|app/build|release)/|(^|/)(?:\.git|\.gradle|\.cxx|bazel-(?:bin|out|testlogs))(/|$)' -or
+            $name -match '(?i)^external/mozc-bazel-vendor/.*\.(?:jks|keystore|p12|pfx)$' -or
             ($localSource -and ($name -match '(^|/)(?:local\.properties|\.env(?:\..*)?)(/|$)' -or
             $name -match '(?i)\.(?:jks|keystore|p12|pfx|pem|apk|aab)$'))) {
             Fail "Forbidden file in source bundle: $name"

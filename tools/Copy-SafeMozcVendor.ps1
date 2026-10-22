@@ -9,9 +9,11 @@ Set-StrictMode -Version Latest
 $root = (Resolve-Path -LiteralPath $Source).Path.TrimEnd('\')
 $destinationRoot = [IO.Path]::GetFullPath($Destination).TrimEnd('\')
 $bazelExternal = Join-Path $root 'bazel-external'
+$publicDebugKey = Join-Path $root 'rules_android+/tools/android/bazel_debug.keystore'
 $linkTargets = @{}
 $materialized = 0
 $cacheLinks = 0
+$excludedDebugKeys = 0
 
 function IsUnder([string]$Path, [string]$Directory) {
     return $Path.StartsWith($Directory + '\', [StringComparison]::OrdinalIgnoreCase)
@@ -73,6 +75,10 @@ function GetSafeTarget([IO.FileSystemInfo]$Item) {
 }
 
 function CopyNode([string]$From, [string]$To, [string[]]$Stack) {
+    if ($From -eq $publicDebugKey) {
+        $script:excludedDebugKeys++
+        return
+    }
     $item = Get-Item -LiteralPath $From -Force -ErrorAction Stop
     if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
         if ($Stack -contains $item.FullName) { throw "Vendor link cycle: $($item.FullName)" }
@@ -93,6 +99,11 @@ function CopyNode([string]$From, [string]$To, [string[]]$Stack) {
 
 if (Test-Path -LiteralPath $destinationRoot) { throw "Destination already exists: $destinationRoot" }
 $allLinks = @(Get-ChildItem -LiteralPath $root -Recurse -Force -Attributes ReparsePoint)
+$keyFiles = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force |
+    Where-Object { $_.Name -match '(?i)\.(?:jks|keystore|p12|pfx)$' })
+if (@($keyFiles | Where-Object FullName -ne $publicDebugKey).Count -gt 0) {
+    throw 'Vendor contains an unreviewed signing key file.'
+}
 foreach ($link in $allLinks) {
     if ($link.FullName -eq $bazelExternal) {
         $cacheLinks++
@@ -115,3 +126,4 @@ if (@(Get-ChildItem -LiteralPath $destinationRoot -Recurse -Force -Attributes Re
     throw 'Materialized vendor still contains reparse points.'
 }
 Write-Host "Validated $($allLinks.Count - $cacheLinks) internal vendor links ($materialized copy resolutions); excluded $cacheLinks generated bazel-external cache link."
+Write-Host "Excluded $excludedDebugKeys public Bazel debug keystore test fixture."

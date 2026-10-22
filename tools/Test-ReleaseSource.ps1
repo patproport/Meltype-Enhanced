@@ -92,8 +92,9 @@ try {
         if ((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant() -ne $recorded[$name]) {
             Fail "Source SHA-256 mismatch: $name"
         }
-        $localSource = $name -notmatch '^(?:upstream|external/mozc|external/dotnet-runtime)/'
+        $localSource = $name -notmatch '^(?:upstream|external/mozc|external/dotnet-runtime|external/mozc-bazel-vendor)/'
         if ($name -match '^(?:build|app/build|release)/|(^|/)(?:\.git|\.gradle|\.cxx)(/|$)' -or
+            $name -match '(?i)^external/mozc-bazel-vendor/.*\.(?:jks|keystore|p12|pfx)$' -or
             ($localSource -and ($name -match '(^|/)(?:local\.properties|\.env(?:\..*)?)(/|$)' -or
             $name -match '(?i)\.(?:jks|keystore|p12|pfx|pem|apk|aab)$'))) { Fail "Forbidden source file: $name" }
     }
