@@ -8,11 +8,13 @@ Meltype for Android は GPL-3.0-or-later です。次のものを含みます。
 
 ## Mozc
 - https://github.com/google/mozc — Copyright Google LLC — BSD-3-Clause
+- v0.1.0 source: commit `a069a88d4cb5c011de0f9aebb6c149a1c808d904` and its submodules. The exact source-access and build instructions are in `docs/RELEASE-SOURCE.md`.
 - ライセンス全文: `MOZC-LICENSE.txt` (`licenses/native/` に固定コピー。ビルド時は Mozc のソースから再生成可能)
 - Mozc が使っているもののクレジット: `MOZC-CREDITS.html`
 
 ## .NET ランタイム (NativeAOT)
 - https://github.com/dotnet/runtime — Copyright .NET Foundation and Contributors — MIT
+- v0.1.0 NativeAOT runtime pack `10.0.13`, source tag `v10.0.13` at commit `6aa72daa24f66c01c3d7b6a32519e9d21396deec`. Some runtime code is statically included in `libMeltypeNative.so`; `docs/RELEASE-SOURCE.md` gives access to its corresponding source.
 - ライセンス全文: `DOTNET-LICENSE.txt`、.NET が使っているもの: `DOTNET-THIRD-PARTY-NOTICES.txt` (`licenses/native/` に固定コピー。ビルド時は .NET SDK から再生成可能)
 
 APK には、これらのファイルを入れています (設定画面の「ライセンス」で読めます)。GitHub Releases にも同じファイルを置きます。

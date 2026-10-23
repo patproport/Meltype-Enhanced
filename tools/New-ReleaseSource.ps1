@@ -1,3 +1,6 @@
+# Optional full offline source mirror. This copies and hashes the full .NET and
+# Bazel vendor trees and can take hours; it is not the v0.1.0 publication gate.
+# See docs/RELEASE-SOURCE.md for the repository plus fixed-source-link method.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][ValidatePattern('^v[0-9]+\.[0-9]+\.[0-9]+$')][string]$Tag,

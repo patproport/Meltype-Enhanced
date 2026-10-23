@@ -1,3 +1,5 @@
+# Verifies the optional full offline source mirror from New-ReleaseSource.ps1.
+# See docs/RELEASE-SOURCE.md for the v0.1.0 publication method.
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$ArchivePath,
